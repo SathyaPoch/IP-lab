@@ -4,30 +4,64 @@ import EventList from "./components/EventList.vue";
 import { initialEvents } from "./data/events";
 import type { CampusEvent } from "./types";
 
-// A reactive copy of the hard-coded events
 const events = ref<CampusEvent[]>(initialEvents.map(e => ({ ...e })));
 
-// TODO 1: a ref `myBookings` holding the ids of the events I booked (one entry per seat)
-// TODO 2: a computed `bookingCount`
+function readSavedBookings(): number[] {
+  const saved = localStorage.getItem("myBookings");
+  if (saved === null) return [];
 
-// TODO 3: onBook(id): find the event; if it still has a seat,
-//         increase its `booked` and add the id to myBookings
-function onBook(id: number) {
-  console.log("book", id);
- 
+  let parsed: unknown;
+  try {
+    parsed = JSON.parse(saved);
+  } catch (error) {
+    console.error("Could not parse saved bookings from localStorage.", error);
+    return [];
+  }
+
+  if (
+    !Array.isArray(parsed) ||
+    !parsed.every(id => typeof id === "number" && Number.isInteger(id))
+  ) {
+    console.error("Saved bookings in localStorage have an invalid format.");
+    return [];
+  }
+  return parsed;
 }
 
-// TODO 4 (bonus): keep my bookings after a page reload
-//   - watch myBookings and save it to localStorage (JSON.stringify)
-//   - read it back when the app starts, and add those seats to `booked`
+const myBookings = ref<number[]>([]);
+for (const id of readSavedBookings()) {
+  const event = events.value.find(item => item.id === id);
+  if (event && event.booked < event.capacity) {
+    event.booked += 1;
+    myBookings.value.push(id);
+  }
+}
+
+const bookingCount = computed(() => myBookings.value.length);
+
+watch(
+  myBookings,
+  bookings => localStorage.setItem("myBookings", JSON.stringify(bookings)),
+  { deep: true, immediate: true },
+);
+
+function onBook(id: number) {
+  const event = events.value.find(item => item.id === id);
+  if (!event || event.booked >= event.capacity) return;
+
+  event.booked += 1;
+  myBookings.value.push(id);
+}
 </script>
 
 <template>
   <main>
     <header>
       <h1>Campus Events</h1>
-      <!-- TODO 5: show the real count ("1 seat" / "N seats") -->
-      <p class="mine">You have booked 0 seats.</p>
+      <p class="mine">
+        You have booked {{ bookingCount }}
+        {{ bookingCount === 1 ? "seat" : "seats" }}.
+      </p>
     </header>
     <EventList :events="events" @book="onBook" />
   </main>
