@@ -29,9 +29,13 @@ const almostFull = computed(()=> {
 
 <template>
   <!-- TODO 4: replace the hard-coded text with the event's data (use formatDate) -->
-
+  <p>{{ props.event.category }}</p>
+  <h3>{{ props.event.title }}</h3>
+  <p class="meta">
+    {{ formatDate(props.event.startsAt)}} {{ props.event.location }} 
+  </p>
   <!-- TODO 5: add the class "full" on <article> when the event is full -->
-  <article class="card">
+  <article class="card full" >
     <p class="category">workshop</p>
     <h2>Git Workshop</h2>
     <p class="meta">Wed 4 Nov, 13:30 · Lab 3</p>
@@ -39,7 +43,11 @@ const almostFull = computed(()=> {
     <!-- TODO 6: when full, show only <p class="badge">Full</p>.
          Otherwise show "N seats left" ("1 seat left" for one seat),
          with the class "warn" when almost full. Use v-if / v-else. -->
-    <p class="seats">3 seats left</p>
+    <p v-if="left==0" class="badge"> full </p>     
+    <p v-else class="badge" :class="{warn: left <=5 }">
+      {{ left === 1 ? "1 seat left." : `${left} seats left` }} 
+    </p>
+    <p class="seats">3 seats left</p>d
 
     <!-- TODO 7: disable the button when full; on click, emit "book" with the event id -->
     <button @click="emit('book',props.event.id)" :disabled="isFull">Book a seat</button>
