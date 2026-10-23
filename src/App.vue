@@ -14,6 +14,7 @@ const events = ref<CampusEvent[]>(initialEvents.map(e => ({ ...e })));
 //         increase its `booked` and add the id to myBookings
 function onBook(id: number) {
   console.log("book", id);
+ 
 }
 
 // TODO 4 (bonus): keep my bookings after a page reload

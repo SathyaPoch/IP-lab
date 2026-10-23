@@ -1,6 +1,6 @@
 import type { CampusEvent } from "./types";
 
-export function seatsLeft(e: CampusEvent): number {
+export function seatsLeft(e: CampusEvent, Cam: any): number {
   return Math.max(0, e.capacity - e.booked);
 }
 

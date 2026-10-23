@@ -4,13 +4,24 @@ import type { CampusEvent } from "../types";
 import { formatDate, seatsLeft } from "../format";
 
 // TODO 1: declare a prop `event` of type CampusEvent (defineProps)
-const event = defineProps<{
+const props = defineProps<{
   event: CampusEvent;
 }>();
 
 // TODO 2: declare an event `book` that sends the event id (defineEmits)
-const emit = defineEmits<{e:'book' , id:number}>()
+const emit = defineEmits<{
+  (e:'book' , id:number): void 
+}>();
 // TODO 3: computed values
+const left = computed<number>(()=> {
+  return seatsLeft(props.event , 0) // capacity - booked
+})
+const isFull = computed(()=> {
+  return left.value == 0 && seatsLeft(props.event , 0) != 0 
+})
+const almostFull = computed(()=> {
+  return left.value <= 5 && seatsLeft(props.event , 0) != 0 
+})
 //   left       -> seats left (use seatsLeft)
 //   isFull     -> no seat left
 //   almostFull -> 1 to 5 seats left
@@ -18,6 +29,7 @@ const emit = defineEmits<{e:'book' , id:number}>()
 
 <template>
   <!-- TODO 4: replace the hard-coded text with the event's data (use formatDate) -->
+
   <!-- TODO 5: add the class "full" on <article> when the event is full -->
   <article class="card">
     <p class="category">workshop</p>
@@ -30,7 +42,7 @@ const emit = defineEmits<{e:'book' , id:number}>()
     <p class="seats">3 seats left</p>
 
     <!-- TODO 7: disable the button when full; on click, emit "book" with the event id -->
-    <button>Book a seat</button>
+    <button @click="emit('book',props.event.id)" :disabled="isFull">Book a seat</button>
   </article>
 </template>
 

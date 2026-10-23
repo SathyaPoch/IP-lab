@@ -16,7 +16,7 @@ describe("EventCard", () => {
     expect(w.text()).toContain("Lab 3");
     expect(w.text()).toContain("3 seats left");
   });
-
+  
   it("uses the singular for one seat", () => {
     const w = mount(EventCard, { props: { event: { ...event, booked: 29 } } });
     expect(w.text()).toContain("1 seat left");
