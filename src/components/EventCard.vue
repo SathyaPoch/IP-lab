@@ -3,54 +3,37 @@ import { computed } from "vue";
 import type { CampusEvent } from "../types";
 import { formatDate, seatsLeft } from "../format";
 
-// TODO 1: declare a prop `event` of type CampusEvent (defineProps)
 const props = defineProps<{
   event: CampusEvent;
 }>();
 
-// TODO 2: declare an event `book` that sends the event id (defineEmits)
 const emit = defineEmits<{
-  (e:'book' , id:number): void 
+  (e: "book", id: number): void;
 }>();
-// TODO 3: computed values
-const left = computed<number>(()=> {
-  return seatsLeft(props.event , 0) // capacity - booked
-})
-const isFull = computed(()=> {
-  return left.value == 0 && seatsLeft(props.event , 0) != 0 
-})
-const almostFull = computed(()=> {
-  return left.value <= 5 && seatsLeft(props.event , 0) != 0 
-})
-//   left       -> seats left (use seatsLeft)
-//   isFull     -> no seat left
-//   almostFull -> 1 to 5 seats left
+
+const left = computed<number>(() => {
+  return seatsLeft(props.event);
+});
+const isFull = computed(() => left.value === 0);
+const almostFull = computed(() => left.value > 0 && left.value <= 5);
 </script>
 
 <template>
-  <!-- TODO 4: replace the hard-coded text with the event's data (use formatDate) -->
-  <p>{{ props.event.category }}</p>
-  <h3>{{ props.event.title }}</h3>
-  <p class="meta">
-    {{ formatDate(props.event.startsAt)}} {{ props.event.location }} 
-  </p>
-  <!-- TODO 5: add the class "full" on <article> when the event is full -->
-  <article class="card full" >
-    <p class="category">workshop</p>
-    <h2>Git Workshop</h2>
-    <p class="meta">Wed 4 Nov, 13:30 · Lab 3</p>
-
-    <!-- TODO 6: when full, show only <p class="badge">Full</p>.
-         Otherwise show "N seats left" ("1 seat left" for one seat),
-         with the class "warn" when almost full. Use v-if / v-else. -->
-    <p v-if="left==0" class="badge"> full </p>     
-    <p v-else class="badge" :class="{warn: left <=5 }">
-      {{ left === 1 ? "1 seat left." : `${left} seats left` }} 
+  <article class="card" :class="{ full: isFull }">
+    <p class="category">{{ props.event.category }}</p>
+    <h2>{{ props.event.title }}</h2>
+    <p class="meta">
+      {{ formatDate(props.event.startsAt) }} · {{ props.event.location }}
     </p>
-    <p class="seats">3 seats left</p>d
 
-    <!-- TODO 7: disable the button when full; on click, emit "book" with the event id -->
-    <button @click="emit('book',props.event.id)" :disabled="isFull">Book a seat</button>
+    <p v-if="isFull" class="badge">Full</p>
+    <p v-else class="seats" :class="{ warn: almostFull }">
+      {{ left === 1 ? "1 seat left" : `${left} seats left` }}
+    </p>
+
+    <button @click="emit('book', props.event.id)" :disabled="isFull">
+      Book a seat
+    </button>
   </article>
 </template>
 
